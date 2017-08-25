@@ -105,8 +105,7 @@ namespace net.nuagenetworks.bambou
             this.owner = owner;
         }
 
-        @Override
-        public void fetch() throws RestException {
+        public override void fetch() throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.fetch(this);
@@ -115,8 +114,7 @@ namespace net.nuagenetworks.bambou
             }
         }
 
-        @Override
-        public void save() throws RestException {
+        public override void save() throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.save(this);
@@ -125,8 +123,7 @@ namespace net.nuagenetworks.bambou
             }
         }
 
-        @Override
-        public void save(Integer responseChoice) throws RestException {
+        public override void save(Integer responseChoice) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.save(this, responseChoice);
@@ -135,8 +132,7 @@ namespace net.nuagenetworks.bambou
             }
         }
 
-        @Override
-        public void delete() throws RestException {
+        public override void delete() throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.delete(this);
@@ -146,7 +142,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void delete(Integer responseChoice) throws RestException {
+        public override void delete(Integer responseChoice) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.delete(this, responseChoice);
@@ -156,7 +152,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void createChild(RestObject childRestObj) throws RestException {
+        public override void createChild(RestObject childRestObj) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.createChild(this, childRestObj);
@@ -166,7 +162,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void createChild(RestObject childRestObj, Integer responseChoice, boolean commit) throws RestException {
+        public override void createChild(RestObject childRestObj, Integer responseChoice, boolean commit) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.createChild(this, childRestObj, responseChoice, commit);
@@ -176,7 +172,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void instantiateChild(RestObject childRestObj, RestObject fromTemplate) throws RestException {
+        public override void instantiateChild(RestObject childRestObj, RestObject fromTemplate) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.instantiateChild(this, childRestObj, fromTemplate);
@@ -186,7 +182,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void instantiateChild(RestObject childRestObj, RestObject fromTemplate, Integer responseChoice, boolean commit) throws RestException {
+        public override void instantiateChild(RestObject childRestObj, RestObject fromTemplate, Integer responseChoice, boolean commit) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.instantiateChild(this, childRestObj, fromTemplate, responseChoice, commit);
@@ -196,7 +192,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void assign(List<? extends RestObject> childRestObjs) throws RestException {
+        public override void assign(List<? extends RestObject> childRestObjs) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.assign(this, childRestObjs);
@@ -206,7 +202,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void assign(List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
+        public override void assign(List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
             RestSession<?> session = RestSession.getCurrentSession();
             if (session != null) {
                 session.assign(this, childRestObjs, commit);
@@ -220,7 +216,7 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void fetch(RestSession<?> session) throws RestException {
+        public override void fetch(RestSession<?> session) throws RestException {
             ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.GET, getResourceUrl(session), null, null, null,
                     BambouUtils.getArrayClass(this));
             if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL && response.getBody().length == 1) {
@@ -234,12 +230,12 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void save(RestSession<?> session) throws RestException {
+        public override void save(RestSession<?> session) throws RestException {
             save(session, null);
         }
 
         @Override
-        public void save(RestSession<?> session, Integer responseChoice) throws RestException {
+        public override void save(RestSession<?> session, Integer responseChoice) throws RestException {
             String params = BambouUtils.getResponseChoiceParam(responseChoice);
             ResponseEntity<Object> response = session.sendRequestWithRetry(HttpMethod.PUT, getResourceUrl(session), params, null, this, Object.class);
             if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
@@ -251,12 +247,12 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void delete(RestSession<?> session) throws RestException {
+        public override void delete(RestSession<?> session) throws RestException {
             delete(session, 1);
         }
 
         @Override
-        public void delete(RestSession<?> session, Integer responseChoice) throws RestException {
+        public override void delete(RestSession<?> session, Integer responseChoice) throws RestException {
             String params = BambouUtils.getResponseChoiceParam(responseChoice);
             ResponseEntity<Object> response = session.sendRequestWithRetry(HttpMethod.DELETE, getResourceUrl(session), params, null, null, Object.class);
             if (response.getStatusCode().series() == HttpStatus.Series.SUCCESSFUL) {
@@ -268,12 +264,12 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void createChild(RestSession<?> session, RestObject childRestObj) throws RestException {
+        public override void createChild(RestSession<?> session, RestObject childRestObj) throws RestException {
             createChild(session, childRestObj, null, true);
         }
 
         @Override
-        public void createChild(RestSession<?> session, RestObject childRestObj, Integer responseChoice, boolean commit) throws RestException {
+        public override void createChild(RestSession<?> session, RestObject childRestObj, Integer responseChoice, boolean commit) throws RestException {
             String params = BambouUtils.getResponseChoiceParam(responseChoice);
             ResponseEntity<RestObject[]> response = session.sendRequestWithRetry(HttpMethod.POST, getResourceUrlForChildType(session, childRestObj.getClass()),
                     params, null, childRestObj, BambouUtils.getArrayClass(childRestObj));
@@ -296,12 +292,12 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void instantiateChild(RestSession<?> session, RestObject childRestObj, RestObject fromTemplate) throws RestException {
+        public override void instantiateChild(RestSession<?> session, RestObject childRestObj, RestObject fromTemplate) throws RestException {
             instantiateChild(session, childRestObj, fromTemplate, null, true);
         }
 
         @Override
-        public void instantiateChild(RestSession<?> session, RestObject childRestObj, RestObject fromTemplate, Integer responseChoice, boolean commit)
+        public override void instantiateChild(RestSession<?> session, RestObject childRestObj, RestObject fromTemplate, Integer responseChoice, boolean commit)
                 throws RestException {
             if (fromTemplate.getId() == null) {
                 throw new RestException(String.format("Cannot instantiate a child from a template with no ID: %s", fromTemplate));
@@ -312,12 +308,12 @@ namespace net.nuagenetworks.bambou
         }
 
         @Override
-        public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs) throws RestException {
+        public override void assign(RestSession<?> session, List<? extends RestObject> childRestObjs) throws RestException {
             assign(session, childRestObjs, true);
         }
 
         @Override
-        public void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
+        public override void assign(RestSession<?> session, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
             // Make sure there are child objects passed in
             if (childRestObjs.isEmpty()) {
                 throw new RestException("No child objects specified");
@@ -348,17 +344,17 @@ namespace net.nuagenetworks.bambou
         }
 
         @JsonIgnore
-        public String getRestName() {
+        public override String getRestName() {
             return getRestName(getClass());
         }
 
         @JsonIgnore
-        protected static String getRestName(Class<?> restObjClass) {
+        protected override static String getRestName(Class<?> restObjClass) {
             RestEntity annotation = restObjClass.getAnnotation(RestEntity.class);
             return annotation.restName();
         }
 
-        private void addChild(RestObject childRestObj) throws RestException {
+        private override void addChild(RestObject childRestObj) throws RestException {
             // Get the object's resource name
             String restName = getRestName(childRestObj.getClass());
 

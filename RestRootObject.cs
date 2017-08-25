@@ -25,22 +25,26 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+using Newtonsoft.Json;
+using System;
+
 namespace net.nuagenetworks.bambou
 { 
     public class RestRootObject: RestObject
     {
         private const long serialVersionUID = 1L;
 
-        @JsonProperty(value = "userName")
+        [JsonProperty("username")]
         protected String userName;
 
-        @JsonProperty(value = "password")
+        [JsonProperty("password")]
         protected String password;
 
-        @JsonProperty(value = "APIKey")
+        [JsonProperty("APIKey")]
         protected String apiKey;
 
-        private transient String newPassword;
+        [JsonIgnore]
+        private String newPassword;
 
         public String getUserName() {
             return userName;
@@ -70,7 +74,8 @@ namespace net.nuagenetworks.bambou
             this.newPassword = newPassword;
         }
 
-        public void save(RestSession<?> session) throws RestException {
+        public void save(RestSession<> session)
+        {
             if (newPassword != null) {
                 password = DigestUtils.sha1Hex(newPassword);
             }

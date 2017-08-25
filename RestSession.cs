@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2015, Alcatel-Lucent Inc
+  Copyright (c) 2017, Nokia
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -24,380 +24,306 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package net.nuagenetworks.bambou;
+using net.nuagenetworks.bambou.operation;
+using System;
+using System.Collections.Generic;
 
-import java.util.List;
+namespace net.nuagenetworks.bambou
+{
+    public class GenericRestSession : RestSessionOperations
+    {
+        public void assign(RestObject restObj, List<RestObject> childRestObjs)
+        {
+            restObj.assign(this, childRestObjs);
+        }
 
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+        public void assign(RestObject restObj, List<RestObject> childRestObjs, bool commit)
+        {
+            restObj.assign(this, childRestObjs, commit);
+        }
 
-import net.nuagenetworks.bambou.jms.RestPushCenterJmsActiveMQ;
-import net.nuagenetworks.bambou.jms.RestPushCenterJmsDirectActiveMQ;
-import net.nuagenetworks.bambou.jms.RestPushCenterJmsDirectJBoss;
-import net.nuagenetworks.bambou.jms.RestPushCenterJmsJBoss;
-import net.nuagenetworks.bambou.operation.RestSessionOperations;
-import net.nuagenetworks.bambou.service.RestClientService;
+        public int count<T>(RestFetcher<T> fetcher) where T : RestObject
+        {
+            return count(fetcher, null, null, null, null, null, null, true);
+        }
 
-public class RestSession<R extends RestRootObject> implements RestSessionOperations {
+        public int count<T>(RestFetcher<T> fetcher, string filter, string orderBy, string[] groupBy, int page, int pageSize, string queryParameters, bool commit) where T : RestObject
+        {
+            return fetcher.count(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
+        }
 
-    private static final String ORGANIZATION_HEADER = "X-Nuage-Organization";
-    private static final String CONTENT_TYPE_JSON = "application/json";
+        public void createChild(RestObject restObj, RestObject childRestObj)
+        {
+            restObj.createChild(this, childRestObj);
+        }
 
-    private static final Logger logger = LoggerFactory.getLogger(RestSession.class);
-    private static final ThreadLocal<RestSession<?>> currentSession = new ThreadLocal<RestSession<?>>();
+        public void createChild(RestObject restObj, RestObject childRestObj, int responseChoice, bool commit)
+        {
+            restObj.createChild(this, childRestObj, responseChoice, commit);
+        }
 
-    @Autowired
-    private RestClientService restClientService;
+        public void delete(RestObject restObj)
+        {
+            restObj.delete(this);
+        }
 
-    private String username;
-    private String password;
-    private String enterprise;
-    private String apiUrl;
-    private String apiPrefix;
-    private String certificate;
-    private String privateKey;
-    private double version;
-    private String apiKey;
-    private Class<R> restRootObjClass;
-    private R restRootObj;
+        public void delete(RestObject restObj, int responseChoice)
+        {
+            restObj.delete(this, responseChoice);
+        }
 
-    public RestSession(Class<R> restRootObjClass) {
-        this.restRootObjClass = restRootObjClass;
+        public void fetch(RestObject restObj)
+        {
+            restObj.fetch(this);
+        }
+
+        public List<T> fetch<T>(RestFetcher<T> fetcher) where T : RestObject
+        {
+            return fetch(fetcher, null, null, null, null, null, null, true);
+        }
+
+        public List<T> fetch<T>(RestFetcher<T> fetcher, string filter, string orderBy, string[] groupBy, int page, int pageSize, string queryParameters, bool commit) where T : RestObject
+        {
+            return fetcher.fetch(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
+        }
+
+        public List<T> get<T>(RestFetcher<T> fetcher) where T : RestObject
+        {
+            return get(fetcher, null, null, null, null, null, null, true);
+        }
+
+        public List<T> get<T>(RestFetcher<T> fetcher, string filter, string orderBy, string[] groupBy, int page, int pageSize, string queryParameters, bool commit) where T : RestObject
+        {
+            return fetcher.get(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
+        }
+
+        public T getFirst<T>(RestFetcher<T> fetcher) where T : RestObject
+        {
+            return getFirst(fetcher, null, null, null, null, null, null, true);
+        }
+
+        public T getFirst<T>(RestFetcher<T> fetcher, string filter, string orderBy, string[] groupBy, int page, int pageSize, string queryParameters, bool commit) where T : RestObject
+        {
+            return fetcher.getFirst(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
+        }
+
+        public void instantiateChild(RestObject restObj, RestObject childRestObj, RestObject fromTemplate)
+        {
+            restObj.instantiateChild(this, childRestObj, fromTemplate);
+        }
+
+        public void instantiateChild(RestObject restObj, RestObject childRestObj, RestObject fromTemplate, int responseChoice, bool commit)
+        {
+            restObj.instantiateChild(this, childRestObj, fromTemplate, responseChoice, commit);
+        }
+
+        public void reset()
+        {
+            restRootObj = null;
+            apiKey = null;
+            currentSession.set(null);
+        }
+
+        public void save(RestObject restObj)
+        {
+            restObj.save(this);
+        }
+
+        public void save(RestObject restObj, int responseChoice)
+        {
+            restObj.save(this, responseChoice);
+        }
+
+        public void start()
+        {
+            currentSession.set(this);
+            restClientService.prepareSSLAuthentication(certificate, privateKey);
+            authenticate();
+        }
     }
 
-    public String getUsername() {
-        return username;
-    }
+    public class RestSession<R> : GenericRestSession where R: RestRootObject 
+        {
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+        private const String ORGANIZATION_HEADER = "X-Nuage-Organization";
+        private const String CONTENT_TYPE_JSON = "application/json";
+//        private const ThreadLocal<RestSession<?>> currentSession = new ThreadLocal<RestSession<?>>();
 
-    public String getPassword() {
-        return password;
-    }
+        private RestClientService restClientService;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+        private String username;
+        private String password;
+        private String enterprise;
+        private String apiUrl;
+        private String apiPrefix;
+        private String certificate;
+        private String privateKey;
+        private double version;
+        private String apiKey;
+        private Type restRootObjClass;
+        private R restRootObj;
 
-    public String getEnterprise() {
-        return enterprise;
-    }
+        public RestSession(Type restRootObjClass) {
+            this.restRootObjClass = restRootObjClass;
+        }
 
-    public void setEnterprise(String enterprise) {
-        this.enterprise = enterprise;
-    }
+        public String getUsername() {
+            return username;
+        }
 
-    public String getApiUrl() {
-        return apiUrl;
-    }
+        public void setUsername(String username) {
+            this.username = username;
+        }
 
-    public void setApiUrl(String apiUrl) {
-        this.apiUrl = apiUrl;
-    }
+        public String getPassword() {
+            return password;
+        }
 
-    public String getApiPrefix() {
-        return apiPrefix;
-    }
+        public void setPassword(String password) {
+            this.password = password;
+        }
 
-    public void setApiPrefix(String apiPrefix) {
-        this.apiPrefix = apiPrefix;
-    }
+        public String getEnterprise() {
+            return enterprise;
+        }
 
-    public String getCertificate() {
-        return certificate;
-    }
+        public void setEnterprise(String enterprise) {
+            this.enterprise = enterprise;
+        }
 
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
-    }
+        public String getApiUrl() {
+            return apiUrl;
+        }
 
-    public String getPrivateKey() {
-        return privateKey;
-    }
+        public void setApiUrl(String apiUrl) {
+            this.apiUrl = apiUrl;
+        }
 
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
+        public String getApiPrefix() {
+            return apiPrefix;
+        }
 
-    public double getVersion() {
-        return version;
-    }
+        public void setApiPrefix(String apiPrefix) {
+            this.apiPrefix = apiPrefix;
+        }
 
-    public void setVersion(double version) {
-        this.version = version;
-    }
+        public String getCertificate() {
+            return certificate;
+        }
 
-    protected void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
+        public void setCertificate(String certificate) {
+            this.certificate = certificate;
+        }
 
-    protected static RestSession<?> getCurrentSession() {
-        return currentSession.get();
-    }
+        public String getPrivateKey() {
+            return privateKey;
+        }
 
-    public R getRootObject() {
-        return restRootObj;
-    }
+        public void setPrivateKey(String privateKey) {
+            this.privateKey = privateKey;
+        }
 
-    @Override
-    public void start() throws RestException {
-        currentSession.set(this);
-        restClientService.prepareSSLAuthentication(certificate, privateKey);
-        authenticate();
-    }
+        public double getVersion() {
+            return version;
+        }
 
-    @Override
-    public void reset() {
-        restRootObj = null;
-        apiKey = null;
-        currentSession.set(null);
-    }
+        public void setVersion(double version) {
+            this.version = version;
+        }
 
-    /**
-     * @deprecated use {@link #createPushCenter() or @link
-     *             #createPushCenter(RestPushCenterType)} instead.
-     */
-    @Deprecated
-    public RestPushCenter getPushCenter() {
-        return createPushCenter(RestPushCenterType.LONG_POLL);
-    }
+        protected void setApiKey(String apiKey) {
+            this.apiKey = apiKey;
+        }
 
-    public RestPushCenter createPushCenter() {
-        // PushCenter implementation defaults to JMS from now on
-        return createPushCenter(RestPushCenterType.JMS);
-    }
+        protected static GenericRestSession getCurrentSession() {
+            return currentSession.get();
+        }
 
-    public RestPushCenter createPushCenter(RestPushCenterType pushCenterType) {
-        RestPushCenter pushCenter;
+        public R getRootObject() {
+            return restRootObj;
+        }
 
-        if (pushCenterType == RestPushCenterType.JMS) {
-            if (version >= 5.0) {
-                // VSD version 5.0.x uses a different JMS client than previous
-                // releases
-                RestPushCenterJmsActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsActiveMQ();
-                if (username != null && password != null && enterprise != null) {
-                    String jmsUser = username + "@" + enterprise;
-                    String jmsPassword = password;
-                    pushCenterJmsActiveMQ.setUser(jmsUser);
-                    pushCenterJmsActiveMQ.setPassword(jmsPassword);
-                }
-                pushCenter = pushCenterJmsActiveMQ;
-            } else {
-                pushCenter = new RestPushCenterJmsJBoss();
+
+        protected <T, U> ResponseEntity<T> sendRequestWithRetry(HttpMethod method, String url, String params, HttpHeaders headers, U requestObj,
+                Class<T> responseType) throws RestException {
+            if (params != null) {
+                url += (url.indexOf('?') >= 0) ? ";" + params : "?" + params;
             }
-        } else if (pushCenterType == RestPushCenterType.JMS_NO_JNDI) {
-            if (version >= 5.0) {
-                // VSD version 5.0.x uses a different JMS client than previous
-                // releases
-                RestPushCenterJmsDirectActiveMQ pushCenterJmsActiveMQ = new RestPushCenterJmsDirectActiveMQ();
-                if (username != null && password != null && enterprise != null) {
-                    String jmsUser = username + "@" + enterprise;
-                    String jmsPassword = password;
-                    pushCenterJmsActiveMQ.setUser(jmsUser);
-                    pushCenterJmsActiveMQ.setPassword(jmsPassword);
-                }
-                pushCenter = pushCenterJmsActiveMQ;
-            } else {
-                pushCenter = new RestPushCenterJmsDirectJBoss();
+
+            if (headers == null) {
+                headers = new HttpHeaders();
             }
-        } else {
-            pushCenter = new RestPushCenterLongPoll(this);
-        }
 
-        String url = getRestBaseUrl();
-        pushCenter.setUrl(url);
+            headers.set(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
+            headers.set(ORGANIZATION_HEADER, getEnterprise());
+            headers.set(HttpHeaders.AUTHORIZATION, getAuthenticationHeader());
 
-        return pushCenter;
-    }
+            try {
+                return restClientService.sendRequest(method, url, headers, requestObj, responseType);
+            } catch (RestStatusCodeException ex) {
+                if (ex.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                    // Debug
+                    logger.info("HTTP 401/Unauthorized response received");
 
-    @Override
-    public void fetch(RestObject restObj) throws RestException {
-        restObj.fetch(this);
-    }
+                    // Make sure we are not already re-authenticating
+                    // in order to avoid infinite recursion
+                    if (!(method == HttpMethod.GET && url.equals(restRootObj.getResourceUrl(this)))) {
+                        // Re-authenticate the session and try to send the same
+                        // request again. A new API key might get issued as a result
+                        reset();
+                        authenticate();
 
-    @Override
-    public void save(RestObject restObj) throws RestException {
-        restObj.save(this);
-    }
+                        // Update authorization header with new API key
+                        headers.set(HttpHeaders.AUTHORIZATION, getAuthenticationHeader());
 
-    @Override
-    public void save(RestObject restObj, Integer responseChoice) throws RestException {
-        restObj.save(this, responseChoice);
-    }
-
-    @Override
-    public void delete(RestObject restObj) throws RestException {
-        restObj.delete(this);
-    }
-
-    @Override
-    public void delete(RestObject restObj, Integer responseChoice) throws RestException {
-        restObj.delete(this, responseChoice);
-    }
-
-    @Override
-    public void createChild(RestObject restObj, RestObject childRestObj) throws RestException {
-        restObj.createChild(this, childRestObj);
-    }
-
-    @Override
-    public void createChild(RestObject restObj, RestObject childRestObj, Integer responseChoice, boolean commit) throws RestException {
-        restObj.createChild(this, childRestObj, responseChoice, commit);
-    }
-
-    @Override
-    public void instantiateChild(RestObject restObj, RestObject childRestObj, RestObject fromTemplate) throws RestException {
-        restObj.instantiateChild(this, childRestObj, fromTemplate);
-    }
-
-    @Override
-    public void instantiateChild(RestObject restObj, RestObject childRestObj, RestObject fromTemplate, Integer responseChoice, boolean commit)
-            throws RestException {
-        restObj.instantiateChild(this, childRestObj, fromTemplate, responseChoice, commit);
-    }
-
-    @Override
-    public void assign(RestObject restObj, List<? extends RestObject> childRestObjs) throws RestException {
-        restObj.assign(this, childRestObjs);
-    }
-
-    @Override
-    public void assign(RestObject restObj, List<? extends RestObject> childRestObjs, boolean commit) throws RestException {
-        restObj.assign(this, childRestObjs, commit);
-    }
-
-    @Override
-    public <T extends RestObject> List<T> get(RestFetcher<T> fetcher) throws RestException {
-        return get(fetcher, null, null, null, null, null, null, true);
-    }
-
-    @Override
-    public <T extends RestObject> List<T> fetch(RestFetcher<T> fetcher) throws RestException {
-        return fetch(fetcher, null, null, null, null, null, null, true);
-    }
-
-    @Override
-    public <T extends RestObject> T getFirst(RestFetcher<T> fetcher) throws RestException {
-        return getFirst(fetcher, null, null, null, null, null, null, true);
-    }
-
-    @Override
-    public <T extends RestObject> int count(RestFetcher<T> fetcher) throws RestException {
-        return count(fetcher, null, null, null, null, null, null, true);
-    }
-
-    @Override
-    public <T extends RestObject> List<T> get(RestFetcher<T> fetcher, String filter, String orderBy, String[] groupBy, Integer page, Integer pageSize,
-            String queryParameters, boolean commit) throws RestException {
-        return fetcher.get(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
-    }
-
-    @Override
-    public <T extends RestObject> List<T> fetch(RestFetcher<T> fetcher, String filter, String orderBy, String[] groupBy, Integer page, Integer pageSize,
-            String queryParameters, boolean commit) throws RestException {
-        return fetcher.fetch(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
-    }
-
-    @Override
-    public <T extends RestObject> T getFirst(RestFetcher<T> fetcher, String filter, String orderBy, String[] groupBy, Integer page, Integer pageSize,
-            String queryParameters, boolean commit) throws RestException {
-        return fetcher.getFirst(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
-    }
-
-    @Override
-    public <T extends RestObject> int count(RestFetcher<T> fetcher, String filter, String orderBy, String[] groupBy, Integer page, Integer pageSize,
-            String queryParameters, boolean commit) throws RestException {
-        return fetcher.count(this, filter, orderBy, groupBy, page, pageSize, queryParameters, commit);
-    }
-
-    protected <T, U> ResponseEntity<T> sendRequestWithRetry(HttpMethod method, String url, String params, HttpHeaders headers, U requestObj,
-            Class<T> responseType) throws RestException {
-        if (params != null) {
-            url += (url.indexOf('?') >= 0) ? ";" + params : "?" + params;
-        }
-
-        if (headers == null) {
-            headers = new HttpHeaders();
-        }
-
-        headers.set(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
-        headers.set(ORGANIZATION_HEADER, getEnterprise());
-        headers.set(HttpHeaders.AUTHORIZATION, getAuthenticationHeader());
-
-        try {
-            return restClientService.sendRequest(method, url, headers, requestObj, responseType);
-        } catch (RestStatusCodeException ex) {
-            if (ex.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-                // Debug
-                logger.info("HTTP 401/Unauthorized response received");
-
-                // Make sure we are not already re-authenticating
-                // in order to avoid infinite recursion
-                if (!(method == HttpMethod.GET && url.equals(restRootObj.getResourceUrl(this)))) {
-                    // Re-authenticate the session and try to send the same
-                    // request again. A new API key might get issued as a result
-                    reset();
-                    authenticate();
-
-                    // Update authorization header with new API key
-                    headers.set(HttpHeaders.AUTHORIZATION, getAuthenticationHeader());
-
-                    return restClientService.sendRequest(method, url, headers, requestObj, responseType);
+                        return restClientService.sendRequest(method, url, headers, requestObj, responseType);
+                    } else {
+                        throw ex;
+                    }
                 } else {
                     throw ex;
                 }
-            } else {
-                throw ex;
             }
         }
-    }
 
-    protected String getRestBaseUrl() {
-        return String.format("%s/%s/v%s", apiUrl, apiPrefix, String.valueOf(version).replace('.', '_'));
-    }
-
-    private synchronized void authenticate() throws RestException {
-        // Create the root object if needed
-        if (restRootObj == null) {
-            restRootObj = createRootObject();
-            fetch(restRootObj);
+        protected String getRestBaseUrl() {
+            return String.format("%s/%s/v%s", apiUrl, apiPrefix, String.valueOf(version).replace('.', '_'));
         }
 
-        // Copy the API key from the root object
-        apiKey = restRootObj.getApiKey();
+        private synchronized void authenticate() throws RestException {
+            // Create the root object if needed
+            if (restRootObj == null) {
+                restRootObj = createRootObject();
+                fetch(restRootObj);
+            }
 
-        // Debug
-        logger.debug("Started session with username: " + username + " in enterprise: " + enterprise);
-    }
+            // Copy the API key from the root object
+            apiKey = restRootObj.getApiKey();
 
-    private R createRootObject() throws RestException {
-        try {
-            return restRootObjClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException ex) {
-            throw new RestException(ex);
+            // Debug
+            logger.debug("Started session with username: " + username + " in enterprise: " + enterprise);
         }
-    }
 
-    private String getAuthenticationHeader() {
-        if (apiKey != null) {
-            return String.format("XREST %s", Base64.encodeBase64String(String.format("%s:%s", username, apiKey).getBytes()));
-        } else {
-            return String.format("XREST %s", Base64.encodeBase64String(String.format("%s:%s", username, password).getBytes()));
+        private R createRootObject() throws RestException {
+            try {
+                return restRootObjClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException ex) {
+                throw new RestException(ex);
+            }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "RestSession [restClientService=" + restClientService + ", username=" + username + ", password=" + password + ", enterprise=" + enterprise
-                + ", apiUrl=" + apiUrl + ", apiPrefix=" + apiPrefix + ", certificate=" + certificate + ", privateKey=" + privateKey + ", version=" + version
-                + ", apiKey=" + apiKey + ", restRootObjClass=" + restRootObjClass + ", restRootObj=" + restRootObj + "]";
+        private String getAuthenticationHeader() {
+            if (apiKey != null) {
+                return String.format("XREST %s", Base64.encodeBase64String(String.format("%s:%s", username, apiKey).getBytes()));
+            } else {
+                return String.format("XREST %s", Base64.encodeBase64String(String.format("%s:%s", username, password).getBytes()));
+            }
+        }
+
+        public override String toString() {
+            return "RestSession [restClientService=" + restClientService + ", username=" + username + ", password=" + password + ", enterprise=" + enterprise
+                    + ", apiUrl=" + apiUrl + ", apiPrefix=" + apiPrefix + ", certificate=" + certificate + ", privateKey=" + privateKey + ", version=" + version
+                    + ", apiKey=" + apiKey + ", restRootObjClass=" + restRootObjClass + ", restRootObj=" + restRootObj + "]";
+        }
     }
 }
