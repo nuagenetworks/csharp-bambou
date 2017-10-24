@@ -48,6 +48,7 @@
     <Compile Include="RestObject.cs" />
     <Compile Include="RestSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RestSessionBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

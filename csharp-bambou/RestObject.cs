@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Reflection;
 
 namespace net.nuagenetworks.bambou
 {
-    public class RestObject
+    public abstract class RestObject
     {
         [JsonProperty("id")]
         protected String id;
@@ -27,6 +28,8 @@ namespace net.nuagenetworks.bambou
         [JsonProperty("owner")]
         protected String owner;
 
+        [JsonIgnore]
+        protected RestSessionBase session;
 
         public String getId()
         {
@@ -86,6 +89,35 @@ namespace net.nuagenetworks.bambou
         public void setOwner(String value)
         {
             this.owner = value;
+        }
+
+        public String getResourceUrl(RestSessionBase session, bool ignoreRoot = false)
+        {
+            MethodInfo info = this.GetType().GetMethod("getResourceName");
+            var resourceName = info.Invoke(null, null);
+
+            String url = session.getRestBaseUrl();
+
+            if (id != null)
+            {
+                return String.Format("{0}/{1}/{2}", url, resourceName, id);
+            }
+            else if (ignoreRoot)
+            {
+                return String.Format("{0}", url);
+            }
+            else
+            {
+                return String.Format("{0}/{1}", url, resourceName);
+            }
+        }
+
+        public String getResourceUrlForChildType(RestSessionBase session, Type childRestObjClass)
+        {
+            MethodInfo info = childRestObjClass.GetMethod("getResourceName");
+            var childResourceName = info.Invoke(null, null);
+
+            return String.Format("{0}/{1}", getResourceUrl(session,true), childResourceName);
         }
     }
 }
