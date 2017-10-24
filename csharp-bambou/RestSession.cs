@@ -75,7 +75,7 @@ namespace net.nuagenetworks.bambou
             }
         }
 
-        public override HttpWebResponse sendRequestWithRetry(string method, String url, String parameters, WebHeaderCollection headers)
+        public override HttpWebResponse sendRequestWithRetry(string method, String url, String parameters, WebHeaderCollection headers, string body = null)
         {
             if (parameters != null)
             {
@@ -92,10 +92,17 @@ namespace net.nuagenetworks.bambou
             headers.Set(HttpRequestHeader.Authorization, auth);
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = CONTENT_TYPE_JSON;
             request.Method = method;
             request.Headers = headers;
+            request.ContentType = CONTENT_TYPE_JSON;
             request.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+
+            if (body != null)
+            {
+                var byteData = Encoding.ASCII.GetBytes(body);
+                request.ContentLength = byteData.Length;
+                using (var stream = request.GetRequestStream()) stream.Write(byteData, 0, byteData.Length);
+            }
 
             try
             {
@@ -115,12 +122,22 @@ namespace net.nuagenetworks.bambou
                         // request again. A new API key might get issued as a result
                         this.authenticate();
 
-                        return sendRequestWithRetry(method, url, parameters, headers);
+                        return sendRequestWithRetry(method, url, parameters, headers, body);
                     }
                 }
 
-              throw new RestException(we.Message);
+                StreamReader reader = new StreamReader(response.GetResponseStream());
+                String data = reader.ReadToEnd();
+                reader.Close();
+                response.Close();
+
+                throw new RestException(we.Message + ": " + data);
             }
+        }
+
+        public override bool amIRootObject(Object obj)
+        {
+            return this.rootObject.GetType() == obj.GetType();
         }
 
         private void authenticate()

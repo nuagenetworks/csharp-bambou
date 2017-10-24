@@ -25,7 +25,8 @@ namespace net.nuagenetworks.bambou
             return String.Format("{0}/{1}/v{2}", apiUrl, apiPrefix, version.ToString("#0.0#############", CultureInfo.CurrentCulture).Replace('.', '_'));
         }
 
-        public abstract HttpWebResponse sendRequestWithRetry(string method, String url, String parameters, WebHeaderCollection headers);
+        public abstract HttpWebResponse sendRequestWithRetry(string method, String url, String parameters, WebHeaderCollection headers, string body=null);
 
+        public abstract bool amIRootObject(Object obj);
     }
 }

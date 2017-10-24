@@ -47,7 +47,7 @@ namespace net.nuagenetworks.bambou
                 reader.Close();
                 response.Close();
 
-                return JsonConvert.DeserializeObject<List<T>>(data);
+                return JsonConvert.DeserializeObject<List<T>>(data, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore});
             }
 
             throw new RestException("Response received with status code: " + response.StatusCode);
