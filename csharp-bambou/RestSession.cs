@@ -148,7 +148,7 @@ namespace net.nuagenetworks.bambou
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    if (!(method == "GET" && url == rootObject.getResourceUrl(this)))
+                    if (!(method == "GET" && url == getRootObject().getResourceUrl(this)))
                     {
                         // Re-authenticate the session and try to send the same
                         // request again. A new API key might get issued as a result
@@ -174,12 +174,12 @@ namespace net.nuagenetworks.bambou
 
         public override bool amIRootObject(Object obj)
         {
-            return this.rootObject.GetType() == obj.GetType();
+            return this.getRootObject().GetType() == obj.GetType();
         }
 
         private void authenticate()
         {
-            string url = rootObject.getResourceUrl(this);
+            string url = getRootObject().getResourceUrl(this);
             HttpWebResponse r = sendRequestWithRetry("GET", url, null, null);
             if (r.StatusCode != HttpStatusCode.OK) throw new RestException("Could not authenticate");
 
