@@ -129,7 +129,11 @@ namespace net.nuagenetworks.bambou
             {
                 var byteData = Encoding.ASCII.GetBytes(body);
                 request.ContentLength = byteData.Length;
-                using (var stream = request.GetRequestStream()) stream.Write(byteData, 0, byteData.Length);
+                using (var stream = request.GetRequestStream())
+                {
+                    stream.Write(byteData, 0, byteData.Length);
+                    stream.Close();
+                }
             }
 
             try
@@ -158,6 +162,11 @@ namespace net.nuagenetworks.bambou
                 String data = reader.ReadToEnd();
                 reader.Close();
                 response.Close();
+
+                if (response.StatusCode == HttpStatusCode.MultipleChoices)
+                {
+                    throw new RestMultipleChoiceException(data);
+                }
 
                 throw new RestException(we.Message + ": " + data);
             }

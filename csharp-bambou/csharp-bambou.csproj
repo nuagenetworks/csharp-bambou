@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="RestException.cs" />
     <Compile Include="RestFetcher.cs" />
+    <Compile Include="RestMultipleChoiceException.cs" />
     <Compile Include="RestObject.cs" />
     <Compile Include="RestSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

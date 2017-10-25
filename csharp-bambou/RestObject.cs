@@ -26,7 +26,9 @@
 */
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -49,7 +51,7 @@ namespace net.nuagenetworks.bambou
         protected String parentId;
 
         [JsonProperty("parentType")]
-        protected Type parentType;
+        protected string parentType;
 
         [JsonIgnore]
         protected RestSessionBase session;
@@ -57,19 +59,47 @@ namespace net.nuagenetworks.bambou
         [JsonProperty("id")]
         private String id;
 
+        [JsonIgnore]
         public string NUCreationDate { get => creationDate; set => creationDate = value; }
+        [JsonIgnore]
         public string NUId { get => id; set => id = value; }
+        [JsonIgnore]
         public string NULastUpdatedDate { get => lastUpdatedDate; set => lastUpdatedDate = value; }
+        [JsonIgnore]
         public string NUOwner { get => owner; set => owner = value; }
+        [JsonIgnore]
         public string NUParentId { get => parentId; set => parentId = value; }
-        public Type NUParentType { get => parentType; set => parentType = value; }
+
+        public Type NUParentType
+        {
+            get
+            {
+                if (parentType == null || parentType == "") return null;
+
+                String ns = this.GetType().Namespace;
+                String asm = this.GetType().Assembly.FullName;
+                Type t = Type.GetType(ns + "." + this.parentType+", "+asm,false,true);
+                return t;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    this.parentType = "";
+                }
+                else
+                {
+                    parentType = value.Name;
+                }
+            }
+        }
 
         public void createChild<T>(RestSessionBase session, T childRestObj)
         {
-            this.createChild(session, childRestObj, -1, true);
+            this.createChild(session, childRestObj, -1);
         }
 
-        public void createChild<T>(RestSessionBase session, T childRestObj, int responseChoice, bool commit)
+        public void createChild<T>(RestSessionBase session, T childRestObj, int responseChoice)
         {
             String parameters = null;
             if (responseChoice != -1) parameters = "responseChoice=" + responseChoice.ToString();
@@ -85,11 +115,7 @@ namespace net.nuagenetworks.bambou
 
                 List<T> list = JsonConvert.DeserializeObject<List<T>>(data, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, MissingMemberHandling = MissingMemberHandling.Ignore });
                 T responseRestObj = list[0];
-                if (commit)
-                {
-                    copyJsonProperties(responseRestObj, childRestObj);
-                    //TODO: addChild(childRestObj);
-                }
+                copyJsonProperties(responseRestObj, childRestObj);
             }
         }
 
@@ -103,10 +129,14 @@ namespace net.nuagenetworks.bambou
                 reader.Close();
                 response.Close();
 
-                RestObject obj = (RestObject)JsonConvert.DeserializeObject(data, this.GetType(), new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, MissingMemberHandling = MissingMemberHandling.Ignore });
+                var objList = JsonConvert.DeserializeObject<List<JObject>>(data, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, MissingMemberHandling = MissingMemberHandling.Ignore });
+                JObject jobject = objList[0];
+                var obj = jobject.ToObject(this.GetType());
                 copyJsonProperties(obj, this);
+                return;
             }
 
+            response.Close();
             throw new RestException(response.StatusDescription);
         }
 
@@ -123,9 +153,11 @@ namespace net.nuagenetworks.bambou
             HttpWebResponse response = session.sendRequestWithRetry("DELETE", getResourceUrl(session), parameters, null, jsonToPost);
             if ((int)response.StatusCode >= 200 && (int)response.StatusCode < 300)
             {
+                response.Close();
                 return;
             }
 
+            response.Close();
             throw new RestException("Response received with status code: " + response.StatusCode);
         }
 
@@ -142,16 +174,38 @@ namespace net.nuagenetworks.bambou
             HttpWebResponse response = session.sendRequestWithRetry("PUT", getResourceUrl(session), parameters, null, jsonToPost);
             if ((int)response.StatusCode >= 200 && (int)response.StatusCode < 300)
             {
-                StreamReader reader = new StreamReader(response.GetResponseStream());
-                String data = reader.ReadToEnd();
-                reader.Close();
                 response.Close();
-
-                RestObject obj = (RestObject)JsonConvert.DeserializeObject(data, this.GetType(), new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, MissingMemberHandling = MissingMemberHandling.Ignore });
-                copyJsonProperties(obj, this);
                 return;
             }
 
+            response.Close();
+            throw new RestException("Response received with status code: " + response.StatusCode);
+        }
+
+        public void assign<T>(RestSessionBase session, List<T> children) where T : RestObject
+        {
+            List<string> ids = new List<string>();
+            foreach (T child in children)
+            {
+                ids.Add(child.NUId);
+            }
+
+            assign<T>(session, ids);
+        }
+
+        public void assign<T>(RestSessionBase session, List<string> children)
+        {
+            if (typeof(T) == typeof(RestObject)) throw new RestException("Must use a derived type of RestObject");
+
+            string jsonToPost = JsonConvert.SerializeObject(children, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            HttpWebResponse response = session.sendRequestWithRetry("PUT", getResourceUrlForChildType(session,typeof(T)), null, null, jsonToPost);
+            if ((int)response.StatusCode >= 200 && (int)response.StatusCode < 300)
+            {
+                response.Close();
+                return;
+            }
+
+            response.Close();
             throw new RestException("Response received with status code: " + response.StatusCode);
         }
 
