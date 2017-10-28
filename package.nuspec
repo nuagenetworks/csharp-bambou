@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>net.nuagenetworks.bambou.dll</id>
+    <version>1.0.1</version>
+    <authors>nuagenetworks</authors>
+    <owners>nuagenetworks</owners>
+    <projectUrl>https://github.com/nuagenetworks/csharp-bambou</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Bambou for .NET</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>nuage</tags>
+  </metadata>
+  <files>
+    <file src="csharp-bambou/bin/Release/net.nuagenetworks.bambou.dll" target="lib/net452"/>
+  </files> 
+</package>
