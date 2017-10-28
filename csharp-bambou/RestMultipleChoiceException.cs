@@ -40,8 +40,8 @@ namespace net.nuagenetworks.bambou
         private string label;
         private int id;
 
-        public string Label { get => label; set => label = value; }
-        public int Id { get => id; set => id = value; }
+        public string Label { get { return label;} set { label = value; }}
+        public int Id { get { return  id;} set { id = value; }}
     }
 
     public class RestMultipleChoiceException: RestException
@@ -68,8 +68,8 @@ namespace net.nuagenetworks.bambou
 
         }
 
-        public string Title { get => title; set => title = value; }
-        public string Description { get => description; set => description = value; }
-        public List<ResponseChoice> Choices { get => choices; set => choices = value; }
+        public string Title { get { return title;} set { title = value; }}
+        public string Description { get { return description; }set { description = value;} }
+        public List<ResponseChoice> Choices { get { return choices;} set { choices = value;} }
     }
 }

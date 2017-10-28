@@ -60,15 +60,15 @@ namespace net.nuagenetworks.bambou
         private String id;
 
         [JsonIgnore]
-        public string NUCreationDate { get => creationDate; set => creationDate = value; }
+        public string NUCreationDate { get { return creationDate;} set { creationDate = value;} }
         [JsonIgnore]
-        public string NUId { get => id; set => id = value; }
+        public string NUId { get { return id;} set { id = value;} }
         [JsonIgnore]
-        public string NULastUpdatedDate { get => lastUpdatedDate; set => lastUpdatedDate = value; }
+        public string NULastUpdatedDate { get { return lastUpdatedDate;} set { lastUpdatedDate = value;} }
         [JsonIgnore]
-        public string NUOwner { get => owner; set => owner = value; }
+        public string NUOwner { get { return owner;} set { owner = value;} }
         [JsonIgnore]
-        public string NUParentId { get => parentId; set => parentId = value; }
+        public string NUParentId { get { return parentId;} set { parentId = value; } }
 
         public Type NUParentType
         {
