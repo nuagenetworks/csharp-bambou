@@ -34,8 +34,7 @@ RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -b -c curlcookies
 
 ID=$(echo $RESPONSE | jq -r ".id")
 
-cd csharp-bambou/bin/Release
-UPLOAD_RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -H "Content-type: application/x-dosexec" --data-binary @$FILE https://uploads.github.com/repos/nuagenetworks/csharp-bambou/releases/$ID/assets?name=$FILE)
+UPLOAD_RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -H "Content-type: application/x-dosexec" --data-binary @csharp-bambou/bin/Release/$FILE https://uploads.github.com/repos/nuagenetworks/csharp-bambou/releases/$ID/assets?name=$FILE)
 
 # Build nuget package
 sed -i "s/VERSION_VAR/$TAG/g" package.nuspec
