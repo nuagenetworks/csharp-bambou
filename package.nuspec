@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>net.nuagenetworks.bambou.dll</id>
-    <version>1.0.1</version>
+    <version>VERSION_VAR</version>
     <authors>nuagenetworks</authors>
     <owners>nuagenetworks</owners>
     <projectUrl>https://github.com/nuagenetworks/csharp-bambou</projectUrl>
