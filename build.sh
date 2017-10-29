@@ -30,16 +30,16 @@ sed -i "s/^.*AssemblyFileVersion.*$/[assembly: AssemblyFileVersion(\"$TAG\")]/g"
 xbuild /p:Configuration="Release" csharp-bambou.sln
 
 #Create release on github
-RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -b -c curlcookies -d '{"tag_name": "'$TAG'","target_commitish": "master", "name": "Bambou .NET '$TAG'","body": "Bambou library for .NET"}' https://api.github.com/repos/nuagenetworks/csharp-bambou/releases)
+RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -f -d '{"tag_name": "'$TAG'","target_commitish": "master", "name": "Bambou .NET '$TAG'","body": "Bambou library for .NET"}' https://api.github.com/repos/nuagenetworks/csharp-bambou/releases)
 
 ID=$(echo $RESPONSE | jq -r ".id")
 
-UPLOAD_RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -H "Content-type: application/x-dosexec" --data-binary @csharp-bambou/bin/Release/$FILE https://uploads.github.com/repos/nuagenetworks/csharp-bambou/releases/$ID/assets?name=$FILE)
+UPLOAD_RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -f -H "Content-type: application/x-dosexec" --data-binary @csharp-bambou/bin/Release/$FILE https://uploads.github.com/repos/nuagenetworks/csharp-bambou/releases/$ID/assets?name=$FILE)
 
 # Build nuget package
 sed -i "s/VERSION_VAR/$TAG/g" package.nuspec
 nuget pack package.nuspec
 
 # Push to nuget
-nuget push net.nuagenetworks.bambou.dll.1.0.1.nupkg $NUGET_TOKENTnuget push net.nuagenetworks.bambou.dll.$TAG.nupkg $NUGETTOKEN -Source https://www.nuget.org/api/v2/package -Source https://www.nuget.org/api/v2/package
+nuget push net.nuagenetworks.bambou.dll.$TAG.nupkg $NUGETTOKEN -Source https://www.nuget.org/api/v2/package
 
