@@ -29,6 +29,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Text;
 
 namespace net.nuagenetworks.bambou
@@ -39,6 +40,19 @@ namespace net.nuagenetworks.bambou
 
         private const String ORGANIZATION_HEADER = "X-Nuage-Organization";
         private const String CONTENT_TYPE_JSON = "application/json";
+        private event RemoteCertificateValidationCallback restCertificateValidationCallback;
+
+        public event RemoteCertificateValidationCallback RestCertificateValidationCallback
+        {
+            add
+            {
+                restCertificateValidationCallback += value;
+            }
+            remove
+            {
+                restCertificateValidationCallback -= value;
+            }
+        }
 
         protected RestSession()
         {
@@ -123,7 +137,10 @@ namespace net.nuagenetworks.bambou
             request.Method = method;
             request.Headers = headers;
             request.ContentType = CONTENT_TYPE_JSON;
-            request.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+            if (restCertificateValidationCallback != null)
+            {
+                request.ServerCertificateValidationCallback += restCertificateValidationCallback;
+            }
 
             if (body != null)
             {

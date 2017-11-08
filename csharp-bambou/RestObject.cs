@@ -252,19 +252,3 @@ namespace net.nuagenetworks.bambou
         }
     }
 }
-
-/*private void addChild(RestObject childRestObj)
-{
-    // Get the object's resource name
-    String restName = getRestName(childRestObj.getClass());
-
-// Add child object to registered fetcher for child type
-RestFetcher<RestObject> children = (RestFetcher<RestObject>)fetcherRegistry.get(restName);
-if (children == null) {
-    throw new RestException(String.format("Could not find fetcher with name %s while adding %s in parent %s", restName, childRestObj, this));
-}
-
-if (!children.contains(childRestObj)) {
-    children.add(childRestObj);
-}
-}*/
