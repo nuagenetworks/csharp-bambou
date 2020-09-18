@@ -24,10 +24,13 @@ failscript()
 # Artifact to be released
 FILE=net.nuagenetworks.bambou.dll
 
+PWD=`pwd`
+alias DOCKER="docker run -e HTTPS_PROXY=$HTTPS_PROXY -e HTTP_PROXY=$HTTP_PROXY -v \"$PWD\":/build -w=/build mono:6.8"
+
 # Build
-nuget restore csharp-bambou.sln
-sed -i "s/^.*AssemblyFileVersion.*$/[assembly: AssemblyFileVersion(\"$TAG\")]/g" csharp-bambou/Properties/AssemblyInfo.cs
-xbuild /p:Configuration="Release" csharp-bambou.sln
+DOCKER nuget restore csharp-bambou.sln
+DOCKER sed -i "s/^.*AssemblyFileVersion.*$/[assembly: AssemblyFileVersion(\"$TAG\")]/g" csharp-bambou/Properties/AssemblyInfo.cs
+DOCKER xbuild /p:Configuration="Release" csharp-bambou.sln
 
 #Create release on github
 RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -f -d '{"tag_name": "'$TAG'","target_commitish": "master", "name": "Bambou .NET '$TAG'","body": "Bambou library for .NET"}' https://api.github.com/repos/nuagenetworks/csharp-bambou/releases)
@@ -38,8 +41,8 @@ UPLOAD_RESPONSE=$(curl -H "Authorization: token $GITHUBTOKEN" -X POST -f -H "Con
 
 # Build nuget package
 sed -i "s/VERSION_VAR/$TAG/g" package.nuspec
-nuget pack package.nuspec
+DOCKER nuget pack package.nuspec
 
 # Push to nuget
-nuget push net.nuagenetworks.bambou.dll.$TAG.nupkg $NUGETTOKEN -Source https://www.nuget.org/api/v2/package
+DOCKER nuget push net.nuagenetworks.bambou.dll.$TAG.nupkg $NUGETTOKEN -Source https://www.nuget.org/api/v2/package
 
